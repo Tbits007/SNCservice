@@ -10,6 +10,10 @@ from alembic import context
 
 from app.core.database import Base
 from app.domain.users import Users
+from app.domain.notifications import Notifications
+from app.domain.subscriptions import Subscriptions
+from app.domain.subscription_types import SubscriptionTypes
+from app.domain.tokens import Tokens
 from app.core.config import settings
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
