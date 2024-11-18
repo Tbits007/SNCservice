@@ -39,16 +39,21 @@ class BaseRepository(Generic[T]):
         """
         Создать новую запись.
         """
+        print("debil")
+        print(entity)
+        print(entity.id)
         # Проверяем наличие записи
         existing_entity = await self.get_by_id(entity.id)
-    
+        print("penis")
         if existing_entity is not None:
             # Запись уже существует
             return existing_entity
-
+        print("ochko")
         # Добавляем новую запись, так как такой ещё нет
         self.session.add(entity)
+        print("govno")
         await self.session.commit()
+        print("sex")
         return entity
 
 

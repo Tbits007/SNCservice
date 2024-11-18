@@ -13,5 +13,5 @@ RUN pip install poetry && poetry config virtualenvs.create false && poetry insta
 
 COPY . .
 
-EXPOSE 8001
-CMD ["uvicorn", "app.main:app", "--host=0.0.0.0" , "--reload" , "--port", "8001"]
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host=0.0.0.0" , "--reload" , "--port", "8000"]

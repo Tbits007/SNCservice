@@ -24,14 +24,16 @@ class UserService:
         return user
     
 
-    async def create_user(self, data: UserCreateSchema) -> Users:
+    async def create_user(self, data: dict) -> Users:
+        print("ahmed ->")
+        print(data)
         user = Users(
-            email=data.email,
-            hashed_password=data.password,
-            is_active=data.is_active,
-            is_superuser=data.is_superuser,
-            is_verified=data.is_verified
+            email=data["email"],
+            hashed_password=data["hashed_password"],
+            is_active=data["is_active"],
+            is_superuser=data["is_superuser"],
         )
+        print('ass')
         return await self.user_repo.create(user)
     
 
