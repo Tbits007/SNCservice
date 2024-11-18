@@ -1,44 +1,60 @@
-from fastapi import FastAPI
-from app.producer import get_producer
+import logging
 
-import asyncio
+import brotli
 from aiokafka import AIOKafkaProducer
-from aiokafka.errors import KafkaConnectionError
+from fastapi import FastAPI, APIRouter, Query
+from app.core.config import settings
 
-KAFKA_BROKER = "kafka:9092"  # Адрес вашего брокера Kafka
+log = logging.getLogger("uvicorn")
 
-async def wait_for_kafka():
-    while True:
-        try:
-            # Пытаемся подключиться к Kafka
-            producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKER)
-            await producer.start()
-            await producer.stop()
-            print(f"Kafka is available at {KAFKA_BROKER}")
-            break
-        except KafkaConnectionError:
-            print(f"Kafka is not available yet at {KAFKA_BROKER}. Retrying...")
-            await asyncio.sleep(5)
+router = APIRouter(prefix="/kafka_producer")
 
-if __name__ == "__main__":
-    asyncio.run(wait_for_kafka())
+async def compress(message: str) -> bytes:
 
-producer = get_producer()
-
-from app.api import auth
+    return brotli.compress(
+        bytes(message, settings.file_encoding),
+        quality=settings.file_compression_quality,
+    )
 
 
-app = FastAPI()
+@router.post("/")
+async def produce_message(message: str = Query(...)) -> dict:
+    return await producer.send_and_wait("auth", await compress(message))
 
 
-app.include_router(auth.router)
+def create_application() -> FastAPI:
+    """Create FastAPI application and set routes.
+
+    Returns:
+        FastAPI: The created FastAPI instance.
+    """
+
+    application = FastAPI(openapi_url="/kafka_producer/openapi.json", docs_url="/kafka_producer/docs")
+    application.include_router(router, tags=["producer"])
+    return application
+
+
+def create_producer() -> AIOKafkaProducer:
+
+    return AIOKafkaProducer(
+        bootstrap_servers=settings.kafka_instance,
+    )
+
+
+app = create_application()
+producer = create_producer()
 
 
 @app.on_event("startup")
 async def startup_event():
+    """Start up event for FastAPI application."""
+    log.info("Starting up...")
     await producer.start()
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    """Shutdown event for FastAPI application."""
+
+    log.info("Shutting down...")
     await producer.stop()
