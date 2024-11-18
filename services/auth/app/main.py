@@ -1,5 +1,4 @@
 import logging
-
 import brotli
 from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI, APIRouter, Query
@@ -7,7 +6,9 @@ from app.core.config import settings
 
 log = logging.getLogger("uvicorn")
 
-router = APIRouter(prefix="/kafka_producer")
+router = APIRouter(
+    tags=["Auth"]
+)
 
 async def compress(message: str) -> bytes:
 
@@ -18,9 +19,10 @@ async def compress(message: str) -> bytes:
 
 
 @router.post("/")
-async def produce_message(message: str = Query(...)) -> dict:
-    return await producer.send_and_wait("auth", await compress(message))
-
+async def produce_message(message: str = Query(...)) -> dict: # <------------------- DICT УБЕРИ ЭЭЭ
+    print(message)
+    await producer.send_and_wait("auth", await compress(message))
+    return {'1': "324"}
 
 def create_application() -> FastAPI:
     """Create FastAPI application and set routes.
@@ -29,8 +31,8 @@ def create_application() -> FastAPI:
         FastAPI: The created FastAPI instance.
     """
 
-    application = FastAPI(openapi_url="/kafka_producer/openapi.json", docs_url="/kafka_producer/docs")
-    application.include_router(router, tags=["producer"])
+    application = FastAPI()
+    application.include_router(router)
     return application
 
 

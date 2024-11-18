@@ -22,7 +22,7 @@ def create_application() -> FastAPI:
 def create_consumer() -> AIOKafkaConsumer:
 
     return AIOKafkaConsumer(
-        settings.KAFKA_TOPICS,
+        settings.kafka_topics,
         bootstrap_servers=settings.kafka_instance,
     )
 

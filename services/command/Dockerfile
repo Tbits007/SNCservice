@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED 1
 
 # install system dependencies
 RUN apt-get update \
-    && apt-get -y install kafkacat\
+    && apt-get -y install kcat \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
