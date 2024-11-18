@@ -1,55 +1,69 @@
-# Пример интеграции с FastAPI
-import asyncio
+import logging
+
+import brotli
+from aiokafka import AIOKafkaConsumer
 from fastapi import FastAPI
-from app.core.database import async_session_maker
-from app.consumer import AuthConsumer
 
-import asyncio
-from aiokafka import AIOKafkaProducer
-from aiokafka.errors import KafkaConnectionError
+from app.core.config import settings
 
-KAFKA_BROKER = "kafka:9092"  # Адрес вашего брокера Kafka
+log = logging.getLogger("uvicorn")
 
-async def wait_for_kafka():
+
+def create_application() -> FastAPI:
+    """Create FastAPI application and set routes.
+
+    Returns:
+        FastAPI: The created FastAPI instance.
+    """
+
+    return FastAPI()
+
+
+def create_consumer() -> AIOKafkaConsumer:
+
+    return AIOKafkaConsumer(
+        settings.KAFKA_TOPICS,
+        bootstrap_servers=settings.kafka_instance,
+    )
+
+
+app = create_application()
+consumer = create_consumer()
+
+
+async def decompress(file_bytes: bytes) -> str:
+    return str(
+        brotli.decompress(file_bytes),
+        settings.file_encoding,
+    )
+
+
+async def consume():
     while True:
-        try:
-            # Пытаемся подключиться к Kafka
-            producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKER)
-            await producer.start()
-            await producer.stop()
-            print(f"Kafka is available at {KAFKA_BROKER}")
-            break
-        except KafkaConnectionError:
-            print(f"Kafka is not available yet at {KAFKA_BROKER}. Retrying...")
-            await asyncio.sleep(5)
-
-if __name__ == "__main__":
-    asyncio.run(wait_for_kafka())
-
-app = FastAPI()
-
-# Создаём экземпляр класса AuthConsumer
-consumer = AuthConsumer(
-    bootstrap_servers="kafka:9092",
-    topic="auth",
-    group_id="command_group",
-)
+        async for msg in consumer:
+            print(
+                "consumed: ",
+                f"topic: {msg.topic},",
+                f"partition: {msg.partition},",
+                f"offset: {msg.offset},",
+                f"key: {msg.key},",
+                f"value: {await decompress(msg.value)},",
+                f"timestamp: {msg.timestamp}",
+            )
 
 
 @app.on_event("startup")
 async def startup_event():
-    """Событие старта приложения."""
+    """Start up event for FastAPI application."""
+
+    log.info("Starting up...")
     await consumer.start()
-
-    async def consume_task():
-        # Создаём сессию и передаём её в consumer
-        async with async_session_maker() as session:
-            await consumer.consume(session)
-
-    asyncio.create_task(consume_task())
+    await consume()
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Событие остановки приложения."""
+    """Shutdown event for FastAPI application."""
+
+    log.info("Shutting down...")
     await consumer.stop()

@@ -1,4 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
+import os
+from functools import lru_cache
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -8,6 +12,12 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
 
+    KAFKA_HOST: str 
+    KAFKA_PORT: str 
+    KAFKA_TOPICS: str
+    kafka_instance = f"{KAFKA_HOST}:{KAFKA_PORT}"
+    file_encoding: str = "utf-8"
+    
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
     @property
