@@ -1,9 +1,8 @@
-from uuid import UUID
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class CreateUserMessage(BaseModel):
-    email: EmailStr
+    email: str
     hashed_password: str
     is_active: bool
     is_superuser: bool

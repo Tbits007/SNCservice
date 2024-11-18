@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Query
+import json
+from fastapi import APIRouter
 from app.producer import compress, producer_
+from app.schemas.message import CreateUserMessage
+
 
 router = APIRouter(
     prefix="/auth",
@@ -7,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.post("/")
-async def produce_message(message: str = Query(...)) -> None: 
-    print(message)
-    await producer_.send_and_wait("auth", await compress(message))
+@router.post("/register")
+async def register(data: CreateUserMessage) -> None:
+    json_string = json.dumps(data.model_dump())
+    await producer_.send_and_wait("auth", await compress(json_string))
