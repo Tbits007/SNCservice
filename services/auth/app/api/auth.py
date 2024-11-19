@@ -12,10 +12,5 @@ router = APIRouter(
 
 @router.post("/register")
 async def register(data: CreateUserMessage) -> None:
-    
-    data_dict = data.model_dump()
-    data_dict["service"] = "UserService"
-    data_dict["action"] = "create_user"
-    json_string = json.dumps(data_dict)
-
+    json_string = json.dumps(data.model_dump())
     await producer_.send_and_wait("auth", await compress(json_string))
