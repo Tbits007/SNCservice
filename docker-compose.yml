@@ -27,6 +27,16 @@ services:
         depends_on:
             - zookeeper
 
+    postgres:
+        image: postgres
+        container_name: postgres
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: command_db
+
     auth:
         build:
             context: ./services/auth
@@ -43,10 +53,11 @@ services:
             - kafka
             - zookeeper
 
-    command_db:
+    command_service:
         build:
             context: ./services/command
             dockerfile: Dockerfile
+        restart: always 
         command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
         volumes:
             - ./services/command:/usr/src/app
@@ -54,6 +65,12 @@ services:
             - KAFKA_HOST=kafka
             - KAFKA_PORT=9092
             - KAFKA_TOPICS=auth
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=command_db
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
         depends_on:
             - kafka
             - zookeeper
+            - postgres

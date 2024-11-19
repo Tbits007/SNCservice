@@ -6,3 +6,6 @@ aiokafka
 brotli
 pydantic
 pydantic-settings
+alembic
+sqlalchemy
+greenlet

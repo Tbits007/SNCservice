@@ -11,8 +11,9 @@ ENV PYTHONUNBUFFERED 1
 # install system dependencies
 RUN apt-get update \
     && apt-get -y install kcat \
+    && apt-get install -y netcat-openbsd \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
 # install python dependencies
 RUN pip install --upgrade pip 

@@ -3,7 +3,6 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.users_repo import UsersRepository
 from app.domain.users import Users
-from app.schemas.users_schemas import UserCreateSchema
 
 
 class UserService:

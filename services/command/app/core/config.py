@@ -3,11 +3,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # DB_HOST: str 
-    # DB_PORT: int
-    # DB_USER: str
-    # DB_PASS: str
-    # DB_NAME: str
+    DB_USER: str = os.getenv("POSTGRES_USER")
+    DB_PASS: str = os.getenv("POSTGRES_PASSWORD")
+    DB_NAME: str = os.getenv("POSTGRES_DB")
+    DB_HOST: str = os.getenv("POSTGRES_HOST")
+    DB_PORT: int = os.getenv("POSTGRES_PORT")
 
     kafka_host: str = os.getenv("KAFKA_HOST")
     kafka_port: str = os.getenv("KAFKA_PORT")
@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     
     #model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
-    #@property
-    #def DATABASE_URL(self):
-    #   return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    @property
+    def DATABASE_URL(self):
+      return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
 settings = Settings()
