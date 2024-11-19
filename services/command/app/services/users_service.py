@@ -24,15 +24,12 @@ class UserService:
     
 
     async def create_user(self, data: dict) -> Users:
-        print("ahmed ->")
-        print(data)
         user = Users(
             email=data["email"],
             hashed_password=data["hashed_password"],
             is_active=data["is_active"],
             is_superuser=data["is_superuser"],
         )
-        print('ass')
         return await self.user_repo.create(user)
     
 
