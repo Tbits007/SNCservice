@@ -7,3 +7,5 @@ kafka-python
 brotli
 pydantic
 pydantic-settings
+python-jose
+passlib

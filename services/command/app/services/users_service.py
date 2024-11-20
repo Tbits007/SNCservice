@@ -23,6 +23,14 @@ class UserService:
         return user
     
 
+    async def get_user_by_email(self, email: str) -> Users | None:
+        # здесь можно добавить дополнительную логику
+        user = await self.user_repo.get_by_email(email)
+        if user is None:
+            raise HTTPException(status_code=500)
+        return user
+    
+    
     async def create_user(self, data: dict) -> Users:
         user = Users(
             email=data["email"],
