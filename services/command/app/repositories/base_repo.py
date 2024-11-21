@@ -15,7 +15,7 @@ class BaseRepository(Generic[T]):
         self.session = session
 
 
-    async def get_all(self) -> list[T]:
+    async def get_all(self) -> list[T | None]:
         """
         Получить все записи.
         """
@@ -44,7 +44,7 @@ class BaseRepository(Generic[T]):
 
         if existing_entity is not None:
             # Запись уже существует
-            return existing_entity
+            raise Exception("Entity already created!")
         
         # Добавляем новую запись, так как такой ещё нет
         self.session.add(entity)

@@ -1,10 +1,20 @@
+from enum import Enum
 import uuid
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class UserActionsEnum(str, Enum):
+    CREATE = "create"
+    READ = "read"
+    UPDATE = "update"
+    DELETE = "delete"
 
 
 class BaseUser(BaseModel):
-    service: str = "UserService" 
+    service: str = "UserService"
+    action: UserActionsEnum | None = None
+
 
     class Config:
         json_schema_extra = {
@@ -23,8 +33,6 @@ class CreateUserSchema(BaseUser):
     is_active: bool
     is_superuser: bool
 
-    action: str = "create_user"
-
 
 class UpdateUserSchema(BaseUser):
     email: Optional[str] = None
@@ -32,14 +40,13 @@ class UpdateUserSchema(BaseUser):
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
     
-    action: str = "update_user"
-
 
 class ReadUserSchema(BaseUser):
+    service: str = Field(default="UserService", exclude=True)
+    action: UserActionsEnum | None = Field(default=None, exclude=True)
+
     id: uuid.UUID
     email: str
     hashed_password: str
     is_active: bool
     is_superuser: bool
-
-    action: str = "get_user_by_id"

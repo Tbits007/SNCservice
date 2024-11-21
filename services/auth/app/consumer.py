@@ -1,13 +1,8 @@
 import json
 import brotli
 from aiokafka import AIOKafkaConsumer
+
 from app.core.config import settings
-from app.core.database import async_session_maker
-from typing import Callable
-from app.services.users_service import UserService
-from app.producer import compress, producer_
-from app.schemas.users_schemas import UserReadSchema
-from app.handler import handle_request
 
 
 async def decompress(file_bytes: bytes) -> dict:
@@ -42,4 +37,4 @@ async def consume():
                 f"timestamp: {msg.timestamp}",
             )
             value = await decompress(msg.value)
-            await handle_request(value)
+            return value

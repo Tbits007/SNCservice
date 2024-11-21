@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import BaseModel
-from uuid import UUID
 
 
 class UserCreateSchema(BaseModel):
@@ -18,7 +17,7 @@ class UserUpdateSchema(BaseModel):
     
     
 class UserReadSchema(BaseModel):
-    id: UUID
+    id: str
     email: str
     hashed_password: str
     is_active: bool

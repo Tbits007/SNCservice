@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     kafka_topics: str = os.getenv("KAFKA_TOPICS")
     kafka_instance: str = f"{kafka_host}:{kafka_port}"
     file_encoding: str = "utf-8"
+    file_compression_quality: int = 1
     
     #model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 

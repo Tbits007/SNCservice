@@ -1,6 +1,7 @@
+import asyncio
 from fastapi import FastAPI
 from app.consumer import consume, consumer_
-
+from app.producer import producer_
 
 def create_application() -> FastAPI:
     """Create FastAPI application and set routes."""
@@ -14,10 +15,12 @@ app = create_application()
 async def startup_event():
     """Start up event for FastAPI application."""
     await consumer_.start()
+    await producer_.start()
     await consume()
-
+    
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Shutdown event for FastAPI application."""
     await consumer_.stop()
+    await producer_.stop()

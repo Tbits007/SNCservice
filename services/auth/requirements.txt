@@ -7,5 +7,9 @@ kafka-python
 brotli
 pydantic
 pydantic-settings
+alembic
+sqlalchemy
+greenlet
 python-jose
 passlib
+bcrypt

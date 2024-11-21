@@ -11,11 +11,14 @@ class UsersRepository(BaseRepository[Users]):
     model: Type[Users] = Users
 
 
-    async def get_by_email(self, email: str) -> Users | None:
+    async def get_by_email(self, email: str) -> list[Users | None]:
         """
-        Получить запись по ID.
+        Получить запись по email.
         """
         query = select(self.model).filter(self.model.email == email)
         result = await self.session.execute(query)
 
-        return result.scalar_one_or_none() # <app.domain.users.Users object at 0x0000018CBC3CDD00> | None
+        result = result.scalar_one_or_none()
+        if result:
+            return [result] # <app.domain.users.Users object at 0x0000018CBC3CDD00> | None
+        return []

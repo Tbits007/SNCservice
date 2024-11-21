@@ -1,43 +1,47 @@
+import json
 from typing import Annotated
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-from app import schemas, models
+#from sqlalchemy.ext.asyncio import AsyncSession
+#from app import schemas, models
+#from app.core.hash import get_password_hash
+from app.schemas.user_schemas import CreateUserSchema, ReadUserSchema, UserActionsEnum
+from app.producer import compress, producer_
+from app.consumer import consume
 from app.core.hash import get_password_hash
-from app.schemas.user_schemas import CreateUserSchema, ReadUserSchema
-from app.core.jwt import (
-    create_token_pair,
-    decode_access_token,
-    add_refresh_token_cookie,
-    JTI,
-    EXP,
-)
+# from app.core.jwt import (
+#     create_token_pair,
+#     decode_access_token,
+#     add_refresh_token_cookie,
+#     JTI,
+#     EXP,
+# )
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-@router.post("/register", response_model=ReadUserSchema)
+@router.post("/register")
 async def register(
     data: CreateUserSchema,
-    db: AsyncSession = Depends(get_db),
 ):
-    user = await models.User.find_by_email(db=db, email=data.email)
-    if user:
-        raise HTTPException(status_code=400, detail="Email has already registered")
-
+    
     # hashing password
     user_data = data.model_dump()
-    user_data["password"] = get_password_hash(user_data["password"])
+    user_data["hashed_password"] = get_password_hash(user_data["hashed_password"])
+    
+    # Отправляем запрос на запись в **command_service**
+    user_data["action"] = UserActionsEnum.CREATE
+    json_string = json.dumps(user_data)
+    await producer_.send_and_wait("auth", await compress(json_string))
+    
+    # # Получаем результат на запрос
+    result = await consume()
+    print(result)
 
-    # save user to db
-    user = models.User(**user_data)
-    user.is_active = False
-    await user.save(db=db)
-
-    return user_schema
+    return result
 
 
 # @router.post("/login")
